@@ -46,8 +46,8 @@ export function Hero() {
             <span className="inline-flex items-center gap-2 rounded-full border border-[#FF6B00]/20 bg-[#FF6B00]/8 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#A0A0A0]"
               style={{ background: "rgba(255,107,0,0.08)" }}
             >
-              <span>🗺</span>
-              İstanbul&apos;un En Büyük Kurye Atölye Noktası
+              <span>⚡</span>
+              Aynı Gün İşlem
             </span>
           </motion.div>
 
@@ -55,22 +55,22 @@ export function Hero() {
             variants={item}
             className="mt-6 text-fluid-hero font-black tracking-tight"
           >
-            <span className="block text-white">Çantanı Getir.</span>
+            <span className="block text-white">Kurye Çantanı</span>
             <span
               className="block text-[#FF6B00]"
               style={{ textShadow: "0 0 40px rgba(255,107,0,0.3)" }}
             >
-              Projeye Dahil Et.
+              Yasallaştır,
             </span>
-            <span className="block text-white">Kazanmaya Başla.</span>
+            <span className="block text-white">Cezasız Çalış.</span>
           </motion.h1>
 
           <motion.p
             variants={item}
             className="mt-6 max-w-[500px] text-[17px] leading-[1.7] text-[#A0A0A0]"
           >
-            Bağcılar E-5 Kirazlı&apos;daki flagship atölyemizde kurye çantanı araç projesine
-            dahil et. Ücretsiz kayıt, 10 dakika işlem, aynı gün aktivasyon.
+            Motosiklet sepeti, topcase ve arka çanta projesi için Bağcılar&apos;ın en hızlı
+            atölyesi. TSE onaylı mühendis imzalı proje — 15 dakikada hazır.
           </motion.p>
 
           <motion.div variants={item} className="mt-8 flex flex-wrap gap-4">
@@ -81,7 +81,7 @@ export function Hero() {
               icon={ChevronRight}
               iconPosition="right"
             >
-              Hemen Randevu Al
+              Ücretsiz Ön Kontrol
             </GlowButton>
             <GlowButton
               href="/nasil-calisir"
@@ -90,12 +90,12 @@ export function Hero() {
               icon={Play}
               iconPosition="left"
             >
-              Nasıl Çalışır
+              Nasıl Çalışır?
             </GlowButton>
           </motion.div>
 
           <motion.div variants={item} className="mt-8 flex flex-wrap gap-6">
-            {["Ücretsiz kayıt", "10 dk işlem", "Hemen aktif"].map((t) => (
+            {["TÜVTÜRK Onaylı", "TSE Mühendisi", "Bağcılar E-5"].map((t) => (
               <div key={t} className="flex items-center gap-2 text-[13px] text-[#A0A0A0]">
                 <CheckCircle2 size={16} className="text-[#22C55E]" />
                 {t}

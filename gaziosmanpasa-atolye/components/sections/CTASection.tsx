@@ -2,13 +2,12 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
 import { CheckCircle2, ArrowRight } from "lucide-react";
-import confetti from "canvas-confetti";
 import toast from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import StatusIndicator from "@/components/ui/StatusIndicator";
+import { FadeIn } from "@/components/ui/FadeIn";
 import { contactSchema, type ContactInput } from "@/lib/validations";
 import { WORKSHOP } from "@/lib/constants";
 
@@ -32,6 +31,8 @@ export default function CTASection() {
       if (!res.ok) throw new Error(json.error || "Hata");
       setBookingId(json.id);
       reset();
+      // Deferred until success path so canvas-confetti's ~5KB doesn't sit in the home-page initial bundle.
+      const { default: confetti } = await import("canvas-confetti");
       confetti({
         particleCount: 80,
         spread: 70,
@@ -50,11 +51,7 @@ export default function CTASection() {
 
       <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 py-20 grid lg:grid-cols-2 gap-12 items-center relative">
         <div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <FadeIn>
             <div className="font-mono text-mono-label text-white/70 mb-4">// HAREKET</div>
             <h2 className="font-display font-extrabold text-section-xl text-white leading-tight mb-5">
               {WORKSHOP.copy.ctaTitle}
@@ -68,16 +65,11 @@ export default function CTASection() {
                 </li>
               ))}
             </ul>
-          </motion.div>
+          </FadeIn>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="bg-void/95 border border-coral-500/40 rounded-2xl p-6 md:p-8 backdrop-blur-sm"
-          style={{ boxShadow: "0 30px 80px rgba(0,0,0,0.4)" }}
+        <FadeIn
+          className="bg-void/95 border border-coral-500/40 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-[0_30px_80px_rgba(0,0,0,0.4)]"
         >
           {bookingId ? (
             <div className="text-center py-10">
@@ -109,7 +101,7 @@ export default function CTASection() {
               </Button>
             </form>
           )}
-        </motion.div>
+        </FadeIn>
       </div>
     </section>
   );

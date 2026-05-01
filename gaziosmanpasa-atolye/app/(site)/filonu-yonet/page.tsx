@@ -1,9 +1,7 @@
 "use client";
 import { useState } from "react";
-import type { Metadata } from "next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Network, Building2, FileSpreadsheet, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -11,6 +9,7 @@ import PageHero from "@/components/layout/PageHero";
 import TiltCard from "@/components/ui/TiltCard";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import { FadeIn } from "@/components/ui/FadeIn";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import RouteLineSVG from "@/components/ui/RouteLineSVG";
 import { b2bSchema, type B2BInput } from "@/lib/validations";
@@ -99,7 +98,7 @@ export default function Page() {
         <h2 className="font-display font-bold text-section-lg text-text-bright mb-8">Neden GOP Atölyesi?</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {features.map((f, i) => (
-            <motion.div key={f.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+            <FadeIn key={f.title} delay={i * 0.1}>
               <TiltCard maxTilt={5}>
                 <div className="panel holo-card p-7 h-full">
                   <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mb-4">
@@ -109,7 +108,7 @@ export default function Page() {
                   <p className="font-body text-sm text-text-secondary leading-relaxed">{f.desc}</p>
                 </div>
               </TiltCard>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </section>

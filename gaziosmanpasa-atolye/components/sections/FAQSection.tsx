@@ -1,10 +1,10 @@
 "use client";
-import { motion } from "framer-motion";
 import * as Accordion from "@radix-ui/react-accordion";
 import { ChevronDown, MessageCircle, Phone, MapPin } from "lucide-react";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import TiltCard from "@/components/ui/TiltCard";
 import Button from "@/components/ui/Button";
+import { FadeIn } from "@/components/ui/FadeIn";
 import { WORKSHOP } from "@/lib/constants";
 
 export default function FAQSection() {
@@ -12,17 +12,12 @@ export default function FAQSection() {
   return (
     <section className="snap-section bg-surface flex items-center">
       <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+        <FadeIn>
           <div className="font-mono text-mono-label text-coral-400 mb-3">// DESTEK</div>
           <h2 className="font-display font-bold text-section-xl text-text-bright mb-12 max-w-3xl">
             {WORKSHOP.copy.faqTitle}
           </h2>
-        </motion.div>
+        </FadeIn>
 
         <div className="grid lg:grid-cols-[3fr_2fr] gap-10">
           <Accordion.Root type="single" collapsible defaultValue="item-0">

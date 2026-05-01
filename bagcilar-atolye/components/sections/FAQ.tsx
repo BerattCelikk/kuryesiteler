@@ -3,7 +3,8 @@
 import * as Accordion from "@radix-ui/react-accordion";
 import { motion } from "framer-motion";
 import { Plus, MessageCircle } from "lucide-react";
-import { WORKSHOP } from "@/lib/constants";
+import { FAQ_ITEMS } from "@/lib/constants";
+import { whatsappLink } from "@/lib/utils";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { GlowButton } from "@/components/ui/GlowButton";
 
@@ -27,7 +28,7 @@ export function FAQ() {
         </motion.div>
 
         <Accordion.Root type="single" collapsible className="mt-12 space-y-0">
-          {WORKSHOP.faq.map((item, i) => (
+          {FAQ_ITEMS.map((item, i) => (
             <Accordion.Item
               key={i}
               value={`item-${i}`}
@@ -35,7 +36,7 @@ export function FAQ() {
             >
               <Accordion.Header>
                 <Accordion.Trigger className="flex w-full items-center justify-between px-2 py-5 text-left text-[16px] font-medium text-white transition-colors hover:text-[#FF6B00] data-[state=open]:text-white">
-                  <span>{item.q}</span>
+                  <span>{item.question}</span>
                   <Plus
                     size={18}
                     className="shrink-0 text-[#FF6B00] transition-transform duration-300 group-data-[state=open]:rotate-45"
@@ -44,7 +45,7 @@ export function FAQ() {
               </Accordion.Header>
               <Accordion.Content className="overflow-hidden data-[state=closed]:animate-[slideUp_200ms_ease-out] data-[state=open]:animate-[slideDown_200ms_ease-out]">
                 <div className="px-2 pb-5 pr-10 text-[15px] leading-[1.7] text-[#A0A0A0]">
-                  {item.a}
+                  {item.answer}
                 </div>
               </Accordion.Content>
             </Accordion.Item>
@@ -61,7 +62,7 @@ export function FAQ() {
           <p className="text-[15px] text-[#A0A0A0]">Başka sorunuz mu var?</p>
           <div className="mt-4 flex justify-center">
             <GlowButton
-              href={`https://wa.me/${WORKSHOP.whatsappRaw}`}
+              href={whatsappLink()}
               external
               variant="primary"
               size="md"

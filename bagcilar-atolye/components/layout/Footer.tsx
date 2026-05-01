@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin, Phone, Clock, Instagram, MessageCircle, ArrowUpRight } from "lucide-react";
 import { WORKSHOP, OTHER_WORKSHOPS } from "@/lib/constants";
+import { whatsappLink } from "@/lib/utils";
 import { Logo } from "@/components/ui/Logo";
 import { WorkshopStatusBadge } from "@/components/ui/WorkshopStatusBadge";
 
@@ -12,14 +13,15 @@ export function Footer() {
           <div className="flex items-center gap-3">
             <Logo size={36} />
             <div className="leading-none">
-              <div className="text-[15px] font-black text-white">KURYE PROJE</div>
+              <div className="text-[15px] font-black text-white">Bağcılar Atölyesi</div>
               <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[#FF6B00]">
-                Bağcılar Atölyesi
+                Kurye Araç Proje
               </div>
             </div>
           </div>
           <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-[#A0A0A0]">
-            İstanbul&apos;un en büyük kurye atölyesi. E-5 Kirazlı üzerinde, her gün 07:00 – 01:00.
+            Bağcılar E-5 üzerinde kurye araç projesi atölyesi. Motosiklet sepeti, topcase
+            ve arka çanta ruhsata işletme. TSE onaylı mühendis.
           </p>
           <div className="mt-5 flex items-center gap-3">
             <a
@@ -32,7 +34,7 @@ export function Footer() {
               <Instagram size={16} />
             </a>
             <a
-              href={`https://wa.me/${WORKSHOP.whatsappRaw}`}
+              href={whatsappLink()}
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#2A2A2A] text-white/80 transition hover:border-[#FF6B00] hover:text-[#FF6B00]"
@@ -132,10 +134,10 @@ export function Footer() {
 
       <div className="border-t border-[#2A2A2A]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-6 text-[11px] text-[#555] md:flex-row">
-          <div>© 2024 Kurye Proje. Tüm hakları saklıdır.</div>
+          <div>© {new Date().getFullYear()} Kurye Proje. Tüm hakları saklıdır.</div>
           <div className="flex gap-5">
-            <Link href="#" className="hover:text-white">Gizlilik</Link>
-            <Link href="#" className="hover:text-white">Şartlar</Link>
+            <Link href="/gizlilik" className="hover:text-white">Gizlilik</Link>
+            <Link href="/kvkk" className="hover:text-white">KVKK</Link>
           </div>
           <div>Türkiye genelinde 7 atölye</div>
         </div>

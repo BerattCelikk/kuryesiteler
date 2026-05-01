@@ -1,8 +1,9 @@
 "use client";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 function GridFloor() {
   const ref = useRef<THREE.Group>(null);
@@ -102,26 +103,76 @@ function CameraParallax() {
   return null;
 }
 
+// Self-sustains the on-demand frame loop while visible; pausing skips invalidate so no further frames are queued.
+function SceneDriver({ visible }: { visible: boolean }) {
+  const invalidate = useThree((s) => s.invalidate);
+  useFrame(() => {
+    if (visible) invalidate();
+  });
+  useEffect(() => {
+    // Restart the loop when visibility flips back to true (no useFrame is running while paused).
+    if (visible) invalidate();
+  }, [visible, invalidate]);
+  return null;
+}
+
+// Releases the WebGL context (and Bloom's render targets) on unmount; useThree() is only available inside Canvas.
+function SceneDisposer() {
+  const { gl } = useThree();
+  useEffect(() => () => gl.dispose(), [gl]);
+  return null;
+}
+
 export default function NightSceneR3F() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const [visible, setVisible] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  // Skip Three.js entirely on mobile or when reduced-motion is set — Bloom + 220 animated particles is a battery/INP killer there.
+  if (isMobile || reducedMotion) {
+    return <div ref={containerRef} className="night-scene-fallback w-full h-full" aria-hidden />;
+  }
+
   return (
-    <Canvas
-      dpr={[1, 2]}
-      camera={{ position: [0, 8, 12], fov: 50 }}
-      gl={{ antialias: true, alpha: true }}
-      style={{ background: "transparent" }}
-    >
-      <fog attach="fog" args={["#080B12", 8, 32]} />
-      <ambientLight intensity={0.3} />
-      <pointLight position={[0, 5, 0]} color="#E8435A" intensity={2} distance={20} />
-      <Suspense fallback={null}>
-        <GridFloor />
-        <Particles />
-        <Beacon />
-        <CameraParallax />
-        <EffectComposer>
-          <Bloom intensity={0.7} luminanceThreshold={0.25} luminanceSmoothing={0.9} mipmapBlur />
-        </EffectComposer>
-      </Suspense>
-    </Canvas>
+    <div ref={containerRef} className="w-full h-full">
+      <Canvas
+        frameloop="demand"
+        dpr={[1, 2]}
+        camera={{ position: [0, 8, 12], fov: 50 }}
+        gl={{ antialias: true, alpha: true }}
+        style={{ background: "transparent" }}
+      >
+        <fog attach="fog" args={["#080B12", 8, 32]} />
+        <ambientLight intensity={0.3} />
+        <pointLight position={[0, 5, 0]} color="#E8435A" intensity={2} distance={20} />
+        <Suspense fallback={null}>
+          <GridFloor />
+          <Particles />
+          <Beacon />
+          <CameraParallax />
+          <SceneDriver visible={visible} />
+          <SceneDisposer />
+          <EffectComposer>
+            <Bloom intensity={0.7} luminanceThreshold={0.25} luminanceSmoothing={0.9} mipmapBlur />
+          </EffectComposer>
+        </Suspense>
+      </Canvas>
+    </div>
   );
 }

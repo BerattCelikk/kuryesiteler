@@ -34,7 +34,8 @@ export function Navbar() {
   }, [open]);
 
   useEffect(() => {
-    setOpen(false);
+    const t = setTimeout(() => setOpen(false), 0);
+    return () => clearTimeout(t);
   }, [pathname]);
 
   const isActive = (href: string) => {
@@ -57,10 +58,10 @@ export function Navbar() {
             <Logo size={32} />
             <div className="leading-none">
               <div className="text-[15px] font-black tracking-tight text-white">
-                KURYE PROJE
+                Bağcılar Atölyesi
               </div>
               <div className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.22em] text-[#FF6B00]">
-                {WORKSHOP.district}
+                Kurye Araç Proje
               </div>
             </div>
           </Link>

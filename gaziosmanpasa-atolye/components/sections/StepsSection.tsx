@@ -1,8 +1,8 @@
 "use client";
-import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
 import RouteLineSVG from "@/components/ui/RouteLineSVG";
 import Button from "@/components/ui/Button";
+import { FadeIn } from "@/components/ui/FadeIn";
 import { WORKSHOP } from "@/lib/constants";
 
 export default function StepsSection() {
@@ -11,30 +11,18 @@ export default function StepsSection() {
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at top right, rgba(232,67,90,0.08) 0%, transparent 60%)" }} />
 
       <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 py-20 relative">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+        <FadeIn>
           <div className="font-mono text-mono-label text-coral-400 mb-3">// SÜREÇ</div>
           <h2 className="font-display font-bold text-section-xl text-text-bright mb-12 max-w-3xl">
             {WORKSHOP.copy.howitworksTitle}
           </h2>
-        </motion.div>
+        </FadeIn>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 lg:gap-2 relative">
           {WORKSHOP.steps.map((step, i) => {
             const Icon = ((Icons as unknown as Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>>)[step.icon] ?? Icons.Circle) as React.ComponentType<{ className?: string; strokeWidth?: number }>;
             return (
-              <motion.div
-                key={step.n}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="relative"
-              >
+              <FadeIn key={step.n} delay={i * 0.08} className="relative">
                 <div className="panel holo-card p-5 h-full flex flex-col items-start text-left">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-coral-500/15 border border-coral-500/40 font-mono text-[11px] text-coral-300 font-bold">
@@ -53,7 +41,7 @@ export default function StepsSection() {
                     <RouteLineSVG variant="horizontal" delay={i * 0.1 + 0.4} duration={0.8} />
                   </div>
                 )}
-              </motion.div>
+              </FadeIn>
             );
           })}
         </div>

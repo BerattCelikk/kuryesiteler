@@ -37,7 +37,7 @@ export async function GET() {
           }}
         >
           <div style={{ width: 12, height: 12, background: "#E8435A", borderRadius: 9999 }} />
-          {`// GOP ATÖLYESİ · GECE GÜNDÜZ`}
+          {`// ${WORKSHOP.name.toUpperCase()} · ${WORKSHOP.tagline.toUpperCase()}`}
         </div>
         <div
           style={{
@@ -49,9 +49,9 @@ export async function GET() {
             letterSpacing: "-0.04em",
           }}
         >
-          <div style={{ fontSize: 110, color: "#EDF2FF" }}>Gece</div>
-          <div style={{ fontSize: 110, color: "#E8435A", textShadow: "0 0 40px rgba(232,67,90,0.5)" }}>Gündüz.</div>
-          <div style={{ fontSize: 110, color: "#EDF2FF" }}>Çalışıyoruz.</div>
+          <div style={{ fontSize: 110, color: "#EDF2FF" }}>{WORKSHOP.copy.heroLine1}</div>
+          <div style={{ fontSize: 110, color: "#E8435A", textShadow: "0 0 40px rgba(232,67,90,0.5)" }}>{WORKSHOP.copy.heroLine2}</div>
+          <div style={{ fontSize: 110, color: "#EDF2FF" }}>{WORKSHOP.copy.heroLine3}</div>
         </div>
         <div
           style={{
@@ -66,7 +66,7 @@ export async function GET() {
             fontFamily: "monospace",
           }}
         >
-          <span>Fevzi Çakmak Cad. · Gaziosmanpaşa</span>
+          <span>{`${WORKSHOP.street} · ${WORKSHOP.district}`}</span>
           <span style={{ color: "#22D3EE" }}>kuryeproje.com / gop</span>
         </div>
       </div>

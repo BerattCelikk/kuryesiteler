@@ -1,8 +1,29 @@
 "use client";
 import { motion } from "framer-motion";
-import * as Icons from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
-import { CheckCircle2, X as XIcon, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  X as XIcon,
+  ArrowRight,
+  Circle,
+  Navigation,
+  CreditCard,
+  PackageCheck,
+  Database,
+  SlidersHorizontal,
+  Rocket,
+  type LucideIcon,
+} from "lucide-react";
+
+// Hand-built map keeps lucide-react tree-shakable; the prior `import * as Icons` pulled the entire icon set into the chunk.
+const STEP_ICON_MAP: Record<string, LucideIcon> = {
+  Navigation,
+  CreditCard,
+  PackageCheck,
+  Database,
+  SlidersHorizontal,
+  Rocket,
+};
 import PageHero from "@/components/layout/PageHero";
 import RouteLineSVG from "@/components/ui/RouteLineSVG";
 import TiltCard from "@/components/ui/TiltCard";
@@ -72,7 +93,7 @@ export default function Page() {
 
       {/* Steps - alternating full sections */}
       {WORKSHOP.steps.map((step, i) => {
-        const Icon = ((Icons as unknown as Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>>)[step.icon] ?? Icons.Circle) as React.ComponentType<{ className?: string; strokeWidth?: number }>;
+        const Icon = STEP_ICON_MAP[step.icon] ?? Circle;
         const even = i % 2 === 0;
         return (
           <section

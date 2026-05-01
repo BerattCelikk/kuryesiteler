@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Registration {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  phone     String
+  date      String
+  time      String
+  platform  String
+  bagCount  Int
+  notes     String?
+  consent   Boolean  @default(true)
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@unique([phone, date, time])
+  @@index([phone])
+  @@index([date])
+  @@index([createdAt])
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  ip        String   @unique
+  count     Int      @default(1)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+}

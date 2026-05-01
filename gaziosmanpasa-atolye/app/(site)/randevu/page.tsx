@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, ArrowRight, ArrowLeft, Calendar, Download } from "lucide-react";
-import confetti from "canvas-confetti";
 import toast from "react-hot-toast";
 import PageHero from "@/components/layout/PageHero";
 import Button from "@/components/ui/Button";
@@ -52,6 +51,8 @@ export default function Page() {
       if (!res.ok) throw new Error(json.error || "Hata");
       setBookingId(json.id);
       setSubmittedData(data);
+      // Deferred until success path so canvas-confetti's ~5KB doesn't sit in the route's initial bundle.
+      const { default: confetti } = await import("canvas-confetti");
       confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 }, colors: ["#E8435A", "#22D3EE", "#FBBF24"] });
       toast.success("Yolda!");
     } catch (e) {

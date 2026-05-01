@@ -4,7 +4,7 @@ import { BookingPage } from "./BookingPage";
 export const metadata: Metadata = {
   title: "Randevu Al",
   description:
-    "Bağcılar Kurye Atölyesi'nden randevu alın. Ücretsiz kayıt, 10 dakika işlem.",
+    "Bağcılar Atölyesi'nde randevu alın. Motosiklet çanta projesi için uygun zaman dilimini seçin, formu doldurun.",
 };
 
 export default function Page() {

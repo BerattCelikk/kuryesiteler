@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,11 +12,17 @@ import {
   MessageCircle,
   Navigation,
   CalendarPlus,
+  ImagePlus,
+  X as XIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { WORKSHOP } from "@/lib/constants";
-import { bookingSchema, type BookingInput } from "@/lib/validations";
-import { todayIsoDate } from "@/lib/utils";
+import {
+  bookingSchema,
+  type BookingInput,
+  type BookingFormData,
+} from "@/lib/validations";
+import { todayIsoDate, whatsappLink } from "@/lib/utils";
 import { WorkshopStatusBadge } from "@/components/ui/WorkshopStatusBadge";
 import { GlowButton } from "@/components/ui/GlowButton";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -47,6 +53,12 @@ function Field({
   );
 }
 
+interface PhotoItem {
+  name: string;
+  size: number;
+  previewUrl: string;
+}
+
 interface SuccessData {
   id: string;
   firstName: string;
@@ -54,18 +66,63 @@ interface SuccessData {
   phone: string;
   date: string;
   timeSlot: string;
+  photoNames: string[];
 }
+
+const MAX_PHOTOS = 3;
+const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+const ALLOWED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export function BookingPage() {
   const [success, setSuccess] = useState<SuccessData | null>(null);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
+
+  const onPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhotoError(null);
+    const incoming = Array.from(e.target.files ?? []);
+    if (!incoming.length) return;
+    const next: PhotoItem[] = [...photos];
+    for (const file of incoming) {
+      if (next.length >= MAX_PHOTOS) {
+        setPhotoError(`En fazla ${MAX_PHOTOS} fotoğraf ekleyebilirsiniz.`);
+        break;
+      }
+      if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+        setPhotoError("Sadece JPEG, PNG veya WebP yükleyebilirsiniz.");
+        continue;
+      }
+      if (file.size > MAX_PHOTO_SIZE) {
+        setPhotoError("Her fotoğraf en fazla 5 MB olabilir.");
+        continue;
+      }
+      next.push({
+        name: file.name,
+        size: file.size,
+        previewUrl: URL.createObjectURL(file),
+      });
+    }
+    setPhotos(next);
+    e.target.value = "";
+  };
+
+  const removePhoto = (idx: number) => {
+    setPhotos((prev) => {
+      const removed = prev[idx];
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return prev.filter((_, i) => i !== idx);
+    });
+    setPhotoError(null);
+  };
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-    watch,
     reset,
+    setError,
   } = useForm<BookingInput>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
@@ -78,61 +135,102 @@ export function BookingPage() {
       platforms: [],
       bagCount: "1",
       notes: "",
-      consent: false as unknown as true,
+      consent: false,
     },
   });
 
-  const notes = watch("notes") || "";
+  const notes = useWatch({ control, name: "notes" }) || "";
 
   const onSubmit = async (data: BookingInput) => {
     try {
+      const payload = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        date: data.date,
+        time: data.timeSlot,
+        platform: data.platforms.join(", "),
+        bagCount: data.bagCount === "3+" ? 3 : Number(data.bagCount),
+        notes: data.notes || null,
+        consent: data.consent,
+        honeypot,
+      };
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        if (json.errors) {
-          Object.values(json.errors)
-            .flat()
-            .slice(0, 1)
-            .forEach((m) => toast.error(String(m)));
-        } else {
-          toast.error(json.error || "Bir hata oluştu");
-        }
+      const result = await res.json();
+
+      if (res.status === 400 && result.fields) {
+        const fieldMap: Record<string, keyof BookingFormData> = {
+          firstName: "firstName",
+          lastName: "lastName",
+          phone: "phone",
+          date: "date",
+          time: "timeSlot",
+          platform: "platforms",
+          bagCount: "bagCount",
+          notes: "notes",
+          consent: "consent",
+        };
+        Object.entries(result.fields).forEach(([field, messages]) => {
+          const formField = fieldMap[field] ?? (field as keyof BookingFormData);
+          setError(formField, {
+            type: "server",
+            message: Array.isArray(messages) ? messages[0] : String(messages),
+          });
+        });
+        toast.error("Lütfen formu kontrol edin");
         return;
       }
+
+      if (!res.ok || !result.success) {
+        toast.error(result.error || "Bir hata oluştu");
+        return;
+      }
+
       setSuccess({
-        id: json.bookingId,
+        id: result.id,
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
         date: data.date,
         timeSlot: data.timeSlot,
+        photoNames: photos.map((p) => p.name),
       });
       reset();
+      photos.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      setPhotos([]);
+      setPhotoError(null);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       toast.error("Bağlantı hatası");
     }
   };
 
+  function toIcsDate(dateStr: string, hourOffset: number): string {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const d = new Date(Date.UTC(year, month - 1, day, hourOffset - 3, 0, 0));
+    return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  }
+
   const downloadIcs = (s: SuccessData) => {
-    const [startH] = s.timeSlot.split(" – ")[0].split(":").map(Number);
-    const dt = new Date(s.date);
-    dt.setHours(startH, 0, 0);
-    const end = new Date(dt.getTime() + 30 * 60000);
-    const fmt = (d: Date) =>
-      d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const [startHour] = s.timeSlot.split(" – ")[0].split(":").map(Number);
+    const selectedDate = s.date;
+    const dtstamp =
+      new Date()
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .split(".")[0] + "Z";
     const ics = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
       "BEGIN:VEVENT",
       `UID:${s.id}@kuryeproje`,
-      `DTSTAMP:${fmt(new Date())}`,
-      `DTSTART:${fmt(dt)}`,
-      `DTEND:${fmt(end)}`,
+      `DTSTAMP:${dtstamp}`,
+      `DTSTART:${toIcsDate(selectedDate, startHour)}`,
+      `DTEND:${toIcsDate(selectedDate, startHour + 1)}`,
       `SUMMARY:Kurye Proje Randevusu - ${s.id}`,
       `LOCATION:${WORKSHOP.address}`,
       "END:VEVENT",
@@ -228,7 +326,7 @@ export function BookingPage() {
 
               <div className="mt-5 flex flex-col gap-2.5">
                 <GlowButton
-                  href={`https://wa.me/${WORKSHOP.whatsappRaw}`}
+                  href={whatsappLink()}
                   external
                   variant="secondary"
                   size="sm"
@@ -295,7 +393,14 @@ export function BookingPage() {
                     <Row k="Ad Soyad" v={`${success.firstName} ${success.lastName}`} />
                     <Row k="Telefon" v={success.phone} />
                     <Row k="Tarih" v={success.date} />
-                    <Row k="Saat" v={success.timeSlot} last />
+                    <Row k="Saat" v={success.timeSlot} last={success.photoNames.length === 0} />
+                    {success.photoNames.length > 0 && (
+                      <Row
+                        k="Fotoğraflar"
+                        v={`Fotoğraflarınız alındı: ${success.photoNames.join(", ")}`}
+                        last
+                      />
+                    )}
                   </div>
 
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -477,6 +582,97 @@ export function BookingPage() {
                     </div>
                   </section>
 
+                  <section>
+                    <h3 className="text-[13px] font-bold uppercase tracking-wider text-[#FF6B00]">
+                      Araç ve Çanta Fotoğrafları (İsteğe Bağlı)
+                    </h3>
+                    <p className="mt-2 text-[12px] text-[#A0A0A0]">
+                      Motorunuzun ve çantanızın fotoğraflarını eklerseniz ön kontrolünüz
+                      çok daha hızlı yapılır.
+                    </p>
+                    <label
+                      htmlFor="photos"
+                      className="mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#2A2A2A] bg-[#0A0A0A] px-4 py-6 text-center transition hover:border-[#FF6B00]/60 hover:bg-[#FF6B00]/5"
+                    >
+                      <ImagePlus size={22} className="text-[#FF6B00]" />
+                      <span className="text-[13px] font-semibold text-white">
+                        Fotoğraf seç ({photos.length}/{MAX_PHOTOS})
+                      </span>
+                      <span className="text-[11px] text-[#555]">
+                        JPEG · PNG · WebP — her biri en fazla 5 MB
+                      </span>
+                      <input
+                        id="photos"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        onChange={onPhotoChange}
+                        className="sr-only"
+                        disabled={photos.length >= MAX_PHOTOS}
+                      />
+                    </label>
+                    {photoError && (
+                      <span className="mt-2 block text-[12px] text-[#EF4444]">
+                        {photoError}
+                      </span>
+                    )}
+                    {photos.length > 0 && (
+                      <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        {photos.map((p, idx) => (
+                          <li
+                            key={p.previewUrl}
+                            className="group relative overflow-hidden rounded-lg border border-[#2A2A2A] bg-[#1A1A1A]"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={p.previewUrl}
+                              alt={p.name}
+                              className="h-32 w-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removePhoto(idx)}
+                              aria-label="Fotoğrafı kaldır"
+                              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition group-hover:opacity-100"
+                            >
+                              <XIcon size={14} />
+                            </button>
+                            <div className="px-2 py-1.5 text-[11px] text-[#A0A0A0]">
+                              <div className="truncate">{p.name}</div>
+                              <div className="text-[10px] text-[#555]">
+                                {(p.size / 1024).toFixed(0)} KB
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      left: "-9999px",
+                      top: "auto",
+                      width: "1px",
+                      height: "1px",
+                      overflow: "hidden",
+                      opacity: 0,
+                    }}
+                  >
+                    <label htmlFor="website">Website (boş bırakın)</label>
+                    <input
+                      id="website"
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                    />
+                  </div>
+
                   <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#2A2A2A] bg-[#0A0A0A] p-4">
                     <input
                       type="checkbox"
@@ -484,8 +680,25 @@ export function BookingPage() {
                       className="mt-0.5 h-4 w-4 accent-[#FF6B00]"
                     />
                     <span className="text-[13px] leading-relaxed text-[#A0A0A0]">
-                      Kişisel verilerimin araç projesi randevu amacıyla işlenmesine onay
-                      veriyorum. <a href="#" className="text-[#FF6B00] underline">Gizlilik Politikası</a>
+                      Kişisel verilerimin randevu amacıyla işlenmesine onay veriyorum.{" "}
+                      <a
+                        href="/kvkk"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#FF6B00] underline"
+                      >
+                        KVKK Aydınlatma Metni
+                      </a>{" "}
+                      ve{" "}
+                      <a
+                        href="/gizlilik"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#FF6B00] underline"
+                      >
+                        Gizlilik Politikası
+                      </a>
+                      &apos;nı okudum.
                     </span>
                   </label>
                   {errors.consent && (

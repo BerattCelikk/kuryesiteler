@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
-import { WORKSHOP } from "@/lib/constants";
+import { TESTIMONIALS } from "@/lib/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
 function initials(name: string) {
@@ -30,8 +30,8 @@ export function Testimonials() {
           </h2>
         </motion.div>
 
-        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {WORKSHOP.testimonials.map((t, i) => (
+        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {TESTIMONIALS.map((t, i) => (
             <motion.div
               key={t.name}
               initial={{ opacity: 0, y: 24 }}
@@ -50,7 +50,7 @@ export function Testimonials() {
               </span>
 
               <div className="flex gap-0.5">
-                {Array.from({ length: t.stars }).map((_, k) => (
+                {Array.from({ length: t.rating }).map((_, k) => (
                   <Star key={k} size={14} className="fill-[#FF6B00] text-[#FF6B00]" />
                 ))}
               </div>
@@ -70,9 +70,7 @@ export function Testimonials() {
                 </div>
                 <div>
                   <div className="text-[15px] font-semibold text-white">{t.name}</div>
-                  <div className="text-[12px] text-[#A0A0A0]">
-                    {t.role} · {t.district}
-                  </div>
+                  <div className="text-[12px] text-[#A0A0A0]">{t.platform}</div>
                 </div>
               </div>
             </motion.div>

@@ -1,12 +1,16 @@
 "use client";
-import { motion } from "framer-motion";
 import StatPanel from "@/components/ui/StatPanel";
 import TiltCard from "@/components/ui/TiltCard";
+import { FadeIn } from "@/components/ui/FadeIn";
 import { WORKSHOP } from "@/lib/constants";
+import { useClientDate } from "@/hooks/useClientDate";
 
 export default function StatsSection() {
+  // Deferred to client to avoid SSR/CSR clock-skew mismatch in the marquee text.
+  const updatedAt =
+    useClientDate((now) => now.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })) ?? "--:--";
   const tickerItems = [
-    `SON GÜNCELLEME: ${new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}`,
+    `SON GÜNCELLEME: ${updatedAt}`,
     "GOP",
     "AVRUPA YAKASI",
     "ROTA AKTİF",
@@ -19,31 +23,20 @@ export default function StatsSection() {
     <section className="snap-section bg-void grid-bg flex flex-col">
       <div className="flex-1 flex items-center">
         <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+          <FadeIn>
             <div className="font-mono text-mono-label text-coral-400 mb-3">// VERİLER</div>
             <h2 className="font-display font-bold text-section-xl text-text-bright mb-12 max-w-3xl">
               {WORKSHOP.copy.statsTitle}
             </h2>
-          </motion.div>
+          </FadeIn>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {WORKSHOP.stats.map((stat, i) => (
-              <motion.div
-                key={stat.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-              >
+              <FadeIn key={stat.id} delay={i * 0.08}>
                 <TiltCard maxTilt={6}>
                   <StatPanel stat={stat} />
                 </TiltCard>
-              </motion.div>
+              </FadeIn>
             ))}
           </div>
         </div>

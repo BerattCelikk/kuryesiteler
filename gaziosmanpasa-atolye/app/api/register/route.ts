@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { z } from "zod";
 import { generateBookingId } from "@/lib/utils";
+import { bookingSchema, contactSchema, b2bSchema } from "@/lib/validations";
 
 const DATA_FILE = path.join(process.cwd(), "data", "registrations.json");
 const RATE_LIMIT_PER_HOUR = 5;
 const memoryRateMap = new Map<string, number[]>();
+
+// Discriminated by `source` so each form type is parsed against its own schema; rejects unknown fields by default.
+const registerSchema = z.discriminatedUnion("source", [
+  bookingSchema.extend({ source: z.literal("booking") }),
+  contactSchema.extend({ source: z.literal("homepage-cta") }),
+  b2bSchema.extend({ source: z.literal("b2b") }),
+]);
 
 async function readAll(): Promise<Record<string, unknown>[]> {
   try {
@@ -40,15 +49,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Çok fazla istek. Bir saat sonra tekrar dene." }, { status: 429 });
   }
 
-  let payload: Record<string, unknown>;
+  let raw: unknown;
   try {
-    payload = await request.json();
+    raw = await request.json();
   } catch {
     return NextResponse.json({ error: "Geçersiz veri." }, { status: 400 });
   }
 
-  if (!payload || typeof payload !== "object") {
-    return NextResponse.json({ error: "Eksik bilgi." }, { status: 400 });
+  const parsed = registerSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Doğrulama hatası.", issues: parsed.error.issues },
+      { status: 400 }
+    );
   }
 
   const id = generateBookingId();
@@ -57,7 +70,7 @@ export async function POST(request: Request) {
     createdAt: new Date().toISOString(),
     ip,
     ua: request.headers.get("user-agent") ?? "",
-    ...payload,
+    ...parsed.data,
   };
 
   try {

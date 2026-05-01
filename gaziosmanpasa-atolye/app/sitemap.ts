@@ -1,16 +1,16 @@
 import type { MetadataRoute } from "next";
+import { WORKSHOP } from "@/lib/constants";
 
 const BASE = "https://gop.kuryeproje.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
+  // Service slugs are derived from constants so adding a new service in WORKSHOP.services flows here automatically.
+  const serviceRoutes = WORKSHOP.services.map((s) => `/hizmetler/${s.slug}`);
   const routes = [
     "",
     "/hizmetler",
-    "/hizmetler/sisteme-gir",
-    "/hizmetler/yenile",
-    "/hizmetler/bakimda-tut",
-    "/hizmetler/hesabi-gor",
+    ...serviceRoutes,
     "/filonu-yonet",
     "/nasil-calisir",
     "/randevu",

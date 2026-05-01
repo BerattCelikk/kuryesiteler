@@ -3,17 +3,14 @@
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
-import { WORKSHOP } from "@/lib/constants";
+import { whatsappLink } from "@/lib/utils";
 
 export function WhatsAppFab() {
   const pathname = usePathname();
   if (pathname === "/randevu") return null;
-  const msg = encodeURIComponent(
-    "Merhaba, Bağcılar atölyesi hakkında bilgi almak istiyorum.",
-  );
   return (
     <motion.a
-      href={`https://wa.me/${WORKSHOP.whatsappRaw}?text=${msg}`}
+      href={whatsappLink()}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="WhatsApp ile ulaş"

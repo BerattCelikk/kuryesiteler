@@ -1,50 +1,29 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Package, RefreshCw, Wrench, MessageCircle, type LucideIcon } from "lucide-react";
+import {
+  ShoppingBasket,
+  Box,
+  Backpack,
+  ShieldCheck,
+  Stamp,
+  BadgeCheck,
+  type LucideIcon,
+} from "lucide-react";
+import { SERVICES } from "@/lib/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { cn } from "@/lib/utils";
 
-interface Service {
-  icon: LucideIcon;
-  title: string;
-  desc: string;
-  badge: string;
-  badgeColor: "green" | "blue" | "orange";
-}
+const iconMap: Record<string, LucideIcon> = {
+  ShoppingBasket,
+  Box,
+  Backpack,
+  ShieldCheck,
+  Stamp,
+  BadgeCheck,
+};
 
-const services: Service[] = [
-  {
-    icon: Package,
-    title: "Çanta Kaydı",
-    desc: "Teslimat çantanızı araç projemize kaydedin, kira planınızı başlatın ve avantajlardan yararlanın.",
-    badge: "Ücretsiz",
-    badgeColor: "green",
-  },
-  {
-    icon: RefreshCw,
-    title: "Çanta Değişim",
-    desc: "Yıpranan veya hasarlı çantanızı yenisiyle değiştirin. Projede kalmaya devam edin.",
-    badge: "Hızlı",
-    badgeColor: "blue",
-  },
-  {
-    icon: Wrench,
-    title: "Bakım & Servis",
-    desc: "Çantanızın periyodik bakımını ve derin temizliğini atölyemizde profesyonelce yaptırın.",
-    badge: "Yerinde",
-    badgeColor: "orange",
-  },
-  {
-    icon: MessageCircle,
-    title: "Proje Danışmanlık",
-    desc: "Araç projesi hakkında merak ettiğiniz her şeyi yüz yüze, açık ve dürüst biçimde yanıtlıyoruz.",
-    badge: "Ücretsiz",
-    badgeColor: "green",
-  },
-];
-
-const badgeStyles: Record<Service["badgeColor"], string> = {
+const badgeStyles: Record<"green" | "blue" | "orange", string> = {
   green: "bg-[#22C55E]/10 text-[#22C55E]",
   blue: "bg-[#3B82F6]/10 text-[#3B82F6]",
   orange: "bg-[#FF6B00]/10 text-[#FF6B00]",
@@ -62,17 +41,17 @@ export function Services() {
         >
           <SectionLabel>Hizmetler</SectionLabel>
           <h2 className="mt-4 text-fluid-xl font-black tracking-tight text-white">
-            Atölyemizde Ne Yapabilirsiniz?
+            Atölyemizde Ne Yapıyoruz?
           </h2>
           <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-[#A0A0A0]">
-            Çanta kaydından servise, danışmanlıktan değişime — kurye hayatınız için her şey
-            tek çatı altında.
+            Sepet projesinden topcase ruhsata işletmeye, TÜVTÜRK hazırlığından noter
+            danışmanlığına — kurye motorunu yasal zemine taşıyan her adım tek çatı altında.
           </p>
         </motion.div>
 
-        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((s, i) => {
-            const Icon = s.icon;
+        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {SERVICES.map((s, i) => {
+            const Icon = iconMap[s.iconName] ?? ShieldCheck;
             return (
               <motion.div
                 key={s.title}
@@ -100,7 +79,9 @@ export function Services() {
                 </div>
 
                 <h3 className="mt-5 text-[18px] font-bold text-white">{s.title}</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-[#A0A0A0]">{s.desc}</p>
+                <p className="mt-2 text-[14px] leading-relaxed text-[#A0A0A0]">
+                  {s.description}
+                </p>
               </motion.div>
             );
           })}

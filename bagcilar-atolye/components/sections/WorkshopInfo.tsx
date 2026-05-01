@@ -13,6 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { WORKSHOP } from "@/lib/constants";
+import { whatsappLink } from "@/lib/utils";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { WorkshopStatusBadge } from "@/components/ui/WorkshopStatusBadge";
 import { GlowButton } from "@/components/ui/GlowButton";
@@ -145,9 +146,7 @@ export function WorkshopInfo() {
                 Rota Al
               </GlowButton>
               <GlowButton
-                href={`https://wa.me/${WORKSHOP.whatsappRaw}?text=${encodeURIComponent(
-                  "Merhaba, Bağcılar atölyesi hakkında bilgi almak istiyorum.",
-                )}`}
+                href={whatsappLink()}
                 external
                 variant="secondary"
                 size="md"
@@ -168,7 +167,11 @@ export function WorkshopInfo() {
           transition={{ duration: 0.6 }}
           className="order-1 lg:order-2 lg:sticky lg:top-28 lg:self-start"
         >
-          <WorkshopMap height={480} zoom={15} />
+          <WorkshopMap height={480} zoom={16} />
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#FF6B00]/30 bg-[#FF6B00]/10 px-3 py-1.5 text-[12px] font-semibold text-[#FF6B00]">
+            <Train size={13} />
+            Kirazlı Metroya 2 dk
+          </div>
         </motion.div>
       </div>
     </section>

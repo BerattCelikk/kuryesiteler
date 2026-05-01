@@ -1,35 +1,24 @@
 "use client";
-import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import TiltCard from "@/components/ui/TiltCard";
 import Badge from "@/components/ui/Badge";
+import { FadeIn } from "@/components/ui/FadeIn";
 import { WORKSHOP } from "@/lib/constants";
 
 export default function TestimonialsSection() {
   return (
     <section className="snap-section bg-void grid-bg flex items-center">
       <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+        <FadeIn>
           <div className="font-mono text-mono-label text-coral-400 mb-3">// REFERANSLAR</div>
           <h2 className="font-display font-bold text-section-xl text-text-bright mb-12 max-w-3xl">
             {WORKSHOP.copy.testimonialsTitle}
           </h2>
-        </motion.div>
+        </FadeIn>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {WORKSHOP.testimonials.map((t, i) => (
-            <motion.div
-              key={t.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1, type: "spring", stiffness: 90 }}
-            >
+            <FadeIn key={t.name} delay={i * 0.1}>
               <TiltCard maxTilt={5}>
                 <div className="panel holo-card p-7 h-full flex flex-col">
                   <div className="flex items-center justify-between mb-5">
@@ -53,7 +42,7 @@ export default function TestimonialsSection() {
                   </div>
                 </div>
               </TiltCard>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </div>

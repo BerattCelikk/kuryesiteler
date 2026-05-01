@@ -8,7 +8,7 @@ import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { contactSchema, type ContactInput } from "@/lib/validations";
 import { WORKSHOP } from "@/lib/constants";
-import { todayIsoDate } from "@/lib/utils";
+import { todayIsoDate, whatsappLink } from "@/lib/utils";
 
 export function RegisterCTA() {
   const [success, setSuccess] = useState<{ id: string; date: string; timeSlot: string } | null>(
@@ -35,12 +35,11 @@ export function RegisterCTA() {
           lastName: data.name.split(" ").slice(1).join(" ") || "-",
           phone: data.phone,
           date: data.date,
-          timeSlot: data.timeSlot,
-          platforms: ["Diğer"],
-          bagCount: "1",
-          notes: data.message,
+          time: data.timeSlot,
+          platform: "Diğer",
+          bagCount: 1,
+          notes: data.message || null,
           consent: true,
-          email: "",
         }),
       });
       const json = await res.json();
@@ -48,7 +47,7 @@ export function RegisterCTA() {
         toast.error(json.error || "Bir hata oluştu");
         return;
       }
-      setSuccess({ id: json.bookingId, date: data.date, timeSlot: data.timeSlot });
+      setSuccess({ id: json.id, date: data.date, timeSlot: data.timeSlot });
       reset();
     } catch {
       toast.error("Bağlantı hatası");
@@ -73,13 +72,14 @@ export function RegisterCTA() {
           className="text-center"
         >
           <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-[#FF6B00]">
-            Bugün Gel, Bugün Başla
+            Aynı Gün İşlem · Ücretsiz Ön Kontrol
           </div>
           <h2 className="mt-4 text-fluid-xl font-black tracking-tight text-white">
-            Araç projesine katılmak için beklemenize gerek yok.
+            Hemen Ön Kontrol Yaptır
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-[#A0A0A0]">
-            Randevu al veya direkt atölyemize uğra — walk-in memnuniyetle karşılanır.
+            Motorunuzun ve çantanızın fotoğraflarını gönderin, uzmanlarımız ücretsiz
+            değerlendirsin. Aynı gün randevu alabilirsiniz.
           </p>
         </motion.div>
 
@@ -184,10 +184,19 @@ export function RegisterCTA() {
                     </>
                   ) : (
                     <>
-                      Randevu Oluştur <ArrowRight size={18} />
+                      Randevu Al <ArrowRight size={18} />
                     </>
                   )}
                 </button>
+
+                <a
+                  href={whatsappLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 block text-center text-[13px] font-semibold text-[#FF6B00] hover:underline"
+                >
+                  WhatsApp ile iletişime geç →
+                </a>
               </motion.form>
             )}
           </AnimatePresence>

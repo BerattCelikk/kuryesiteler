@@ -14,13 +14,16 @@ export function CursorGlow() {
     if (typeof window === "undefined") return;
     const fine = window.matchMedia("(pointer: fine)").matches;
     if (!fine) return;
-    setEnabled(true);
+    const t = setTimeout(() => setEnabled(true), 0);
     const onMove = (e: MouseEvent) => {
       mx.set(e.clientX);
       my.set(e.clientY);
     };
     window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("mousemove", onMove);
+    };
   }, [mx, my]);
 
   if (!enabled) return null;

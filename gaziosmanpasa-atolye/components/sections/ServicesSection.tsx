@@ -7,6 +7,7 @@ const Fingerprint = ScanLine;
 import TiltCard from "@/components/ui/TiltCard";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import { FadeIn } from "@/components/ui/FadeIn";
 import { WORKSHOP } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -26,17 +27,12 @@ export default function ServicesSection() {
   return (
     <section className="snap-section bg-surface flex items-center">
       <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+        <FadeIn>
           <div className="font-mono text-mono-label text-coral-400 mb-3">// HİZMETLER</div>
           <h2 className="font-display font-bold text-section-xl text-text-bright mb-12 max-w-3xl">
             {WORKSHOP.copy.servicesTitle}
           </h2>
-        </motion.div>
+        </FadeIn>
 
         <Tabs.Root value={active} onValueChange={setActive} orientation="vertical">
           <TiltCard maxTilt={4}>

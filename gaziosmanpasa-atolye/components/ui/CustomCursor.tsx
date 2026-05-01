@@ -1,10 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useSpring, animated } from "@react-spring/web";
+import { useEffect, useRef, useState } from "react";
+import { useSpring, animated, to } from "@react-spring/web";
+
+const INTERACTIVE_SELECTOR =
+  "a, button, [data-cursor='hover'], input, textarea, select, label, [role='button']";
 
 export default function CustomCursor() {
   const [hovering, setHovering] = useState(false);
   const [visible, setVisible] = useState(false);
+  // Mirror state in a ref so the mousemove closure can compare without re-subscribing.
+  const hoveringRef = useRef(false);
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -21,9 +26,12 @@ export default function CustomCursor() {
       api.start({ x: e.clientX, y: e.clientY });
       const t = e.target as HTMLElement | null;
       if (!t) return;
-      const isInteractive =
-        t.closest("a, button, [data-cursor='hover'], input, textarea, select, label, [role='button']") !== null;
-      setHovering(isInteractive);
+      const next = t.closest(INTERACTIVE_SELECTOR) !== null;
+      // Skip setState when the value hasn't actually changed — fires per pixel otherwise.
+      if (next !== hoveringRef.current) {
+        hoveringRef.current = next;
+        setHovering(next);
+      }
     };
     const onLeave = () => setVisible(false);
     const onEnter = () => setVisible(true);
@@ -41,7 +49,13 @@ export default function CustomCursor() {
   return (
     <animated.div
       className={`cursor-crosshair ${hovering ? "hovering" : ""}`}
-      style={{ transform: x.to((vx) => `translate(${vx}px, ${y.get()}px) translate(-50%, -50%)`) }}
+      // to([x, y], ...) re-runs on either spring; the prior x.to(...) read y.get() imperatively and stalled on Y-only motion.
+      style={{
+        transform: to(
+          [x, y],
+          (vx, vy) => `translate(${vx}px, ${vy}px) translate(-50%, -50%)`
+        ),
+      }}
       aria-hidden
     />
   );

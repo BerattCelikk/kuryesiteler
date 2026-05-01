@@ -1,14 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
-export function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false);
-  useEffect(() => {
+export function useMediaQuery(query: string): boolean {
+  const subscribe = (onChange: () => void) => {
     const m = window.matchMedia(query);
-    setMatches(m.matches);
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
-    m.addEventListener("change", handler);
-    return () => m.removeEventListener("change", handler);
-  }, [query]);
-  return matches;
+    m.addEventListener("change", onChange);
+    return () => m.removeEventListener("change", onChange);
+  };
+  const getSnapshot = () => window.matchMedia(query).matches;
+  // Server has no matchMedia — return false so SSR markup is deterministic; client hydrates to real value.
+  const getServerSnapshot = () => false;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

@@ -1,15 +1,36 @@
 import Link from "next/link";
-import * as Icons from "lucide-react";
 import * as Accordion from "@radix-ui/react-accordion";
-import { ChevronDown, CheckCircle2, MapPin, MessageCircle, ArrowRight } from "lucide-react";
+import {
+  Box,
+  ChevronDown,
+  CheckCircle2,
+  MapPin,
+  MessageCircle,
+  ArrowRight,
+  Fingerprint,
+  RefreshCcw,
+  Wrench,
+  Calculator,
+  Network,
+  type LucideIcon,
+} from "lucide-react";
 import TiltCard from "@/components/ui/TiltCard";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { WORKSHOP, type Service } from "@/lib/constants";
 
+// Hand-built map keeps lucide-react tree-shakable; the prior `import * as Icons` pulled the entire icon set into the bundle.
+const SERVICE_ICON_MAP: Record<string, LucideIcon> = {
+  Fingerprint,
+  RefreshCcw,
+  Wrench,
+  Calculator,
+  Network,
+};
+
 export default function ServiceDetail({ service }: { service: Service }) {
-  const Icon = ((Icons as unknown as Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>>)[service.icon] ?? Icons.Box) as React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  const Icon = SERVICE_ICON_MAP[service.icon] ?? Box;
   const others = WORKSHOP.services.filter((s) => s.slug !== service.slug);
   const stepsTrio = [
     { n: "01", t: "Atölyeye Gel", d: "Fevzi Çakmak Caddesi'ndeki konumumuza uğra." },

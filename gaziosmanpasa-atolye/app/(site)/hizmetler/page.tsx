@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import * as Icons from "lucide-react";
-import { ArrowUpRight, Network } from "lucide-react";
+import {
+  Box,
+  ArrowUpRight,
+  Network,
+  Fingerprint,
+  RefreshCcw,
+  Wrench,
+  Calculator,
+  type LucideIcon,
+} from "lucide-react";
 import PageHero from "@/components/layout/PageHero";
 import TiltCard from "@/components/ui/TiltCard";
 import Badge from "@/components/ui/Badge";
@@ -13,6 +21,15 @@ export const metadata: Metadata = {
   description: "Kayıt, değişim, bakım, danışmanlık ve filo yönetimi. GOP atölyesinde 5 hizmet, tek nokta.",
 };
 
+// Hand-built map keeps lucide-react tree-shakable; the prior `import * as Icons` pulled the entire icon set into the bundle.
+const SERVICE_ICON_MAP: Record<string, LucideIcon> = {
+  Fingerprint,
+  RefreshCcw,
+  Wrench,
+  Calculator,
+  Network,
+};
+
 export default function HizmetlerPage() {
   return (
     <>
@@ -21,7 +38,7 @@ export default function HizmetlerPage() {
       <section className="max-w-[1400px] mx-auto px-4 md:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {WORKSHOP.services.map((s, i) => {
-            const Icon = ((Icons as unknown as Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>>)[s.icon] ?? Icons.Box) as React.ComponentType<{ className?: string; strokeWidth?: number }>;
+            const Icon = SERVICE_ICON_MAP[s.icon] ?? Box;
             return (
               <TiltCard key={s.id} maxTilt={5}>
                 <Link href={`/hizmetler/${s.slug}`} className="panel holo-card p-7 h-full flex flex-col group block" style={{ animationDelay: `${i * 50}ms` }}>

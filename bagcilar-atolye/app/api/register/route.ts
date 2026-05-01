@@ -1,90 +1,114 @@
-import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
-import { bookingSchema } from "@/lib/validations";
-import { generateBookingId } from "@/lib/utils";
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { registrationSchema } from '@/lib/validations'
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const DATA_FILE = path.join(DATA_DIR, "registrations.json");
+const RATE_LIMIT_MAX = 5
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
 
-const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
-const ipHits: Map<string, number[]> = new Map();
-
-function getIp(req: NextRequest): string {
-  const xf = req.headers.get("x-forwarded-for");
-  if (xf) return xf.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || "unknown";
-}
-
-function rateLimit(ip: string): boolean {
-  const now = Date.now();
-  const hits = (ipHits.get(ip) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (hits.length >= RATE_LIMIT_MAX) return false;
-  hits.push(now);
-  ipHits.set(ip, hits);
-  return true;
-}
-
-async function readAll(): Promise<unknown[]> {
+async function checkRateLimit(ip: string): Promise<boolean> {
+  const now = new Date()
+  const windowEnd = new Date(now.getTime() + RATE_LIMIT_WINDOW_MS)
   try {
-    const buf = await fs.readFile(DATA_FILE, "utf8");
-    const arr = JSON.parse(buf);
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-}
-
-async function writeAll(rows: unknown[]): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(DATA_FILE, JSON.stringify(rows, null, 2), "utf8");
-}
-
-export async function POST(req: NextRequest) {
-  const ip = getIp(req);
-  if (!rateLimit(ip)) {
-    return NextResponse.json(
-      { success: false, error: "Çok fazla istek. Lütfen sonra tekrar deneyin." },
-      { status: 429 },
-    );
-  }
-
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ success: false, error: "Geçersiz istek" }, { status: 400 });
-  }
-
-  const parsed = bookingSchema.safeParse(body);
-  if (!parsed.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const issue of parsed.error.issues) {
-      const key = issue.path.join(".") || "_";
-      if (!fieldErrors[key]) fieldErrors[key] = [];
-      fieldErrors[key].push(issue.message);
+    const existing = await db.rateLimit.findUnique({ where: { ip } })
+    if (!existing) {
+      await db.rateLimit.create({ data: { ip, count: 1, resetAt: windowEnd } })
+      return true
     }
-    return NextResponse.json(
-      { success: false, errors: fieldErrors, error: "Doğrulama hatası" },
-      { status: 400 },
-    );
-  }
-
-  const bookingId = generateBookingId();
-  const timestamp = new Date().toISOString();
-  const record = { bookingId, timestamp, ...parsed.data };
-
-  try {
-    const rows = await readAll();
-    rows.push(record);
-    await writeAll(rows);
+    if (now > existing.resetAt) {
+      await db.rateLimit.update({ where: { ip }, data: { count: 1, resetAt: windowEnd } })
+      return true
+    }
+    if (existing.count >= RATE_LIMIT_MAX) return false
+    await db.rateLimit.update({ where: { ip }, data: { count: { increment: 1 } } })
+    return true
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Kayıt oluşturulamadı" },
-      { status: 500 },
-    );
+    return true
   }
+}
 
-  return NextResponse.json({ success: true, bookingId, timestamp });
+export async function POST(request: NextRequest) {
+  try {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      'unknown'
+
+    const allowed = await checkRateLimit(ip)
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Cok fazla istek. 1 saat sonra tekrar deneyin.' },
+        { status: 429 },
+      )
+    }
+
+    const body = await request.json()
+
+    if (body && typeof body === 'object' && body.honeypot) {
+      return NextResponse.json(
+        { success: true, message: 'Kaydiniz alindi.' },
+        { status: 201 },
+      )
+    }
+
+    const validation = registrationSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Gecersiz form verisi', fields: validation.error.flatten().fieldErrors },
+        { status: 400 },
+      )
+    }
+
+    const data = validation.data
+
+    const duplicate = await db.registration.findUnique({
+      where: { phone_date_time: { phone: data.phone, date: data.date, time: data.time } },
+    })
+    if (duplicate) {
+      return NextResponse.json(
+        { error: 'Bu tarih ve saat icin zaten bir kaydiniz mevcut.' },
+        { status: 409 },
+      )
+    }
+
+    const today = new Date().toISOString().split('T')[0]
+    const todayCount = await db.registration.count({
+      where: { phone: data.phone, date: today },
+    })
+    if (todayCount >= 3) {
+      return NextResponse.json(
+        { error: 'Bugün bu telefon numarasıyla en fazla 3 kayıt yapılabilir.' },
+        { status: 429 },
+      )
+    }
+
+    const registration = await db.registration.create({
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        date: data.date,
+        time: data.time,
+        platform: data.platform,
+        bagCount: data.bagCount,
+        notes: data.notes ?? null,
+        consent: data.consent,
+        ipAddress: ip,
+      },
+    })
+
+    return NextResponse.json(
+      { success: true, message: 'Kaydiniz alindi. Tesekkurler!', id: registration.id },
+      { status: 201 },
+    )
+  } catch (error) {
+    console.error('[POST /api/register]', error)
+    return NextResponse.json(
+      { error: 'Sunucu hatasi. Lutfen tekrar deneyin.' },
+      { status: 500 },
+    )
+  }
+}
+
+export async function GET() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
 }

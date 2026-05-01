@@ -328,3 +328,5 @@ input:-webkit-autofill:focus {
 .text-stat-display { font-size: clamp(3rem, 6vw, 6rem); line-height: 1; letter-spacing: -0.04em; }
 .text-mono-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
 .text-mono-data { font-size: 14px; letter-spacing: 0.06em; }
+
+.night-scene-fallback { background: radial-gradient(ellipse at 60% 40%, #0a1628 0%, #030712 100%); }

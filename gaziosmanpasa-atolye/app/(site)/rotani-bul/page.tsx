@@ -1,25 +1,65 @@
-"use client";
-import dynamic from "next/dynamic";
+import type { Metadata } from "next";
 import { Bus, Train, Route as RouteIcon, ParkingCircle, MapPin, Phone, MessageCircle, ArrowUpRight, Clock } from "lucide-react";
 import PageHero from "@/components/layout/PageHero";
 import TiltCard from "@/components/ui/TiltCard";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import Button from "@/components/ui/Button";
+import WorkshopMapIsland from "@/components/sections/WorkshopMapIsland";
 import { WORKSHOP } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-const WorkshopMap = dynamic(() => import("@/components/sections/WorkshopMap"), { ssr: false, loading: () => <div className="w-full h-full rounded-xl bg-elevated border border-white/10" /> });
+export const metadata: Metadata = {
+  title: "Atölyeyi Bul | GOP Atölye — Gaziosmanpaşa",
+  description:
+    "Gaziosmanpaşa'daki atölyemizin konumunu, çalışma saatlerini ve toplu taşıma seçeneklerini öğrenin.",
+  openGraph: {
+    title: "Atölyeyi Bul | GOP Atölye",
+    description: "Gaziosmanpaşa merkez konumdaki atölyemize nasıl ulaşırsınız?",
+  },
+  alternates: { canonical: "https://gop.kuryeproje.com/rotani-bul" },
+};
 
 const transitIconMap: Record<string, React.ComponentType<{ className?: string }>> = { Bus, Train, Route: RouteIcon, ParkingCircle };
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: WORKSHOP.name,
+  description: WORKSHOP.shortDesc,
+  url: "https://gop.kuryeproje.com/rotani-bul",
+  telephone: WORKSHOP.phoneRaw,
+  email: WORKSHOP.email,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: WORKSHOP.street,
+    addressLocality: WORKSHOP.district,
+    addressRegion: "İstanbul",
+    postalCode: WORKSHOP.postalCode,
+    addressCountry: "TR",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: WORKSHOP.coordinates.lat,
+    longitude: WORKSHOP.coordinates.lng,
+  },
+  openingHours: [
+    `Mo-Fr ${WORKSHOP.hours.weekday.open}-${WORKSHOP.hours.weekday.close}`,
+    `Sa-Su ${WORKSHOP.hours.weekend.open}-${WORKSHOP.hours.weekend.close}`,
+  ],
+};
 
 export default function Page() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PageHero breadcrumb="GOP → ROTANI BUL" title="Neredeyiz?" subtitle="Fevzi Çakmak Caddesi · Gaziosmanpaşa · Avrupa Yakası" />
 
       <section className="max-w-[1400px] mx-auto px-4 md:px-8 py-12 grid lg:grid-cols-[1fr_400px] gap-8">
         <div className="h-[480px] md:h-[580px] panel overflow-hidden p-1">
-          <WorkshopMap />
+          <WorkshopMapIsland />
         </div>
 
         <aside className="space-y-5">

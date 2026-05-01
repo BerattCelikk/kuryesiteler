@@ -9,16 +9,25 @@ import Button from "@/components/ui/Button";
 import RadarPing from "@/components/ui/RadarPing";
 import { WORKSHOP } from "@/lib/constants";
 import { getTodayHours } from "@/lib/utils";
+import { useClientDate } from "@/hooks/useClientDate";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
+// dynamic() at module scope is a no-op until <NightSceneR3F /> is rendered;
+// the conditional below ensures the ~220KB Three.js chunk only downloads on desktop.
 const NightSceneR3F = dynamic(() => import("@/components/three/NightSceneR3F"), { ssr: false });
 
 export default function HeroSection() {
-  const date = new Date().toLocaleDateString("tr-TR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+  const isDesktop = useMediaQuery("(min-width: 769px)");
+  // Deferred to client to avoid SSR/CSR locale-string mismatch; placeholder keeps the line width stable.
+  const date =
+    useClientDate((now) =>
+      now.toLocaleDateString("tr-TR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()
+    ) ?? "·· ··· ····";
 
   return (
     <section className="snap-section flex flex-col">
       <div className="absolute inset-0 z-0">
-        <NightSceneR3F />
+        {isDesktop ? <NightSceneR3F /> : <div className="night-scene-fallback w-full h-full" aria-hidden />}
       </div>
       <div className="absolute inset-0 z-[1] grid-bg opacity-30 pointer-events-none" />
       <div className="absolute inset-0 z-[2] hero-gradient pointer-events-none" />

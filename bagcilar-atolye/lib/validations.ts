@@ -25,7 +25,12 @@ export const bookingSchema = z.object({
     .min(1, "En az bir platform seçin"),
   bagCount: z.enum(["1", "2", "3+"]),
   notes: z.string().max(300, "En fazla 300 karakter").optional(),
-  consent: z.literal(true, { message: "Onay gerekli" }),
+  consent: z
+    .boolean()
+    .refine((val) => val === true, {
+      message: "Devam etmek icin KVKK onayi vermeniz zorunludur",
+    }),
+  photos: z.array(z.string()).optional(),
 });
 
 export const contactSchema = z.object({
@@ -44,5 +49,23 @@ export const contactSchema = z.object({
   message: z.string().max(300).optional(),
 });
 
+export const registrationSchema = z.object({
+  firstName: z.string().min(2, "Adınızı girin").max(30),
+  lastName: z.string().min(2, "Soyadınızı girin").max(30),
+  phone: z.string().regex(phoneRegex, "Geçerli telefon girin (05XXXXXXXXX)"),
+  date: z.string().min(1, "Tarih seçin"),
+  time: z.string().min(1, "Saat dilimi seçin"),
+  platform: z.string().min(1, "Platform seçin").max(100),
+  bagCount: z.number().int().min(1).max(99),
+  notes: z.string().max(300).optional().nullable(),
+  consent: z
+    .boolean()
+    .refine((val) => val === true, {
+      message: "Devam etmek icin KVKK onayi vermeniz zorunludur",
+    }),
+});
+
 export type BookingInput = z.infer<typeof bookingSchema>;
+export type BookingFormData = BookingInput;
 export type ContactInput = z.infer<typeof contactSchema>;
+export type RegistrationInput = z.infer<typeof registrationSchema>;

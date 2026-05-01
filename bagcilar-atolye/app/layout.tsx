@@ -15,39 +15,44 @@ const inter = Inter({
   display: "swap",
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://bagcilar.kuryeproje.com";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bagcilar.kuryeproje.com"),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "Bağcılar Kurye Atölyesi | Araç Projesi Kayıt",
-    template: "%s | Bağcılar Kurye Atölyesi",
+    default: "Bağcılar Atölyesi | Kurye Araç Projesi",
+    template: "%s | Bağcılar Atölyesi",
   },
   description:
-    "İstanbul Bağcılar E-5 Kirazlı yakınında kurye çanta proje atölyesi. Ücretsiz kayıt, 10 dakika, her gün 07:00–01:00 açık.",
+    "Bağcılar E-5 üzerinde motosiklet sepeti, topcase ve arka çanta ruhsata işletme atölyesi. TSE onaylı mühendis imzalı proje, 15 dakikada hazır. Trendyol, Getir, Yemeksepeti kuryeleri için.",
   keywords: [
-    "kurye atölye",
-    "bağcılar kurye",
-    "araç projesi",
-    "teslimat çantası",
-    "kurye kayıt istanbul",
-    "e-5 kurye",
+    "motosiklet sepeti ruhsata işletme",
+    "topcase proje",
+    "kurye araç projesi",
+    "Bağcılar atölye",
+    "TÜVTÜRK",
+    "arka çanta projesi",
+    "Trendyol kurye",
+    "Getir kurye",
   ],
   openGraph: {
     type: "website",
     locale: "tr_TR",
-    url: "https://bagcilar.kuryeproje.com",
-    siteName: "Kurye Proje Bağcılar",
-    title: "Bağcılar Kurye Atölyesi | Araç Projesi",
+    url: siteUrl,
+    siteName: "Bağcılar Atölyesi",
+    title: "Bağcılar Atölyesi | Kurye Araç Projesi",
     description:
-      "İstanbul Bağcılar E-5 Kirazlı'daki flagship kurye çanta proje atölyesi. Ücretsiz kayıt.",
+      "Bağcılar E-5 üzerinde motosiklet sepeti, topcase ve arka çanta ruhsata işletme. TSE onaylı mühendis imzalı proje, 15 dakikada hazır.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bağcılar Kurye Atölyesi",
+    title: "Bağcılar Atölyesi | Kurye Araç Projesi",
     description:
-      "Flagship kurye atölyesi. E-5 Kirazlı. Her gün 07:00 – 01:00.",
+      "Motosiklet sepeti, topcase ve arka çanta ruhsata işletme. Bağcılar E-5, 15 dakikada proje.",
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://bagcilar.kuryeproje.com" },
+  alternates: { canonical: siteUrl },
 };
 
 export const viewport: Viewport = {

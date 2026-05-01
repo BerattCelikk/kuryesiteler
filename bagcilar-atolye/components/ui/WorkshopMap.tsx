@@ -18,7 +18,7 @@ interface Props {
   mini?: boolean;
 }
 
-export default function WorkshopMap({ height = 400, zoom = 15, mini = false }: Props) {
+export default function WorkshopMap({ height = 400, zoom = 16, mini = false }: Props) {
   return (
     <div
       style={{ height: typeof height === "number" ? `${height}px` : height }}
@@ -43,7 +43,9 @@ export default function WorkshopMap({ height = 400, zoom = 15, mini = false }: P
         >
           <Popup>
             <div style={{ fontSize: 13 }}>
-              <strong style={{ color: "#FF6B00" }}>{WORKSHOP.name}</strong>
+              <strong style={{ color: "#FF6B00" }}>
+                Bağcılar Atölyesi — Kurye Araç Proje
+              </strong>
               <br />
               {WORKSHOP.hours.weekday.open} – {WORKSHOP.hours.weekday.close}
             </div>

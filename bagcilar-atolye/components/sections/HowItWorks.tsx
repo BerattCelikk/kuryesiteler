@@ -1,29 +1,25 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, ClipboardCheck, TrendingUp, ArrowRight } from "lucide-react";
+import {
+  MessageCircle,
+  MapPin,
+  ClipboardCheck,
+  ShieldCheck,
+  FileCheck,
+  ArrowRight,
+  type LucideIcon,
+} from "lucide-react";
+import { HOW_IT_WORKS } from "@/lib/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
-const steps = [
-  {
-    num: "01",
-    icon: MapPin,
-    title: "Atölyeye Gel",
-    desc: "Bağcılar atölyemize motorsikletinle gel. Kirazlı metro çıkışına 3 dakika. Önünde park alanı mevcut.",
-  },
-  {
-    num: "02",
-    icon: ClipboardCheck,
-    title: "Çantanı Kaydet",
-    desc: "Kimlik kartını ve plaka bilgini getir. Çantanı teslim al, sisteme 10 dakikada kaydet, proje numaranı al.",
-  },
-  {
-    num: "03",
-    icon: TrendingUp,
-    title: "Kazanmaya Başla",
-    desc: "Araç projesi avantajlarından hemen yararlan. Kira planın aynı gün aktive olur. İlk günden kazanmaya başla.",
-  },
-];
+const iconMap: Record<string, LucideIcon> = {
+  MessageCircle,
+  MapPin,
+  ClipboardCheck,
+  ShieldCheck,
+  FileCheck,
+};
 
 export function HowItWorks() {
   return (
@@ -40,52 +36,51 @@ export function HowItWorks() {
             <SectionLabel>Süreç</SectionLabel>
           </div>
           <h2 className="mt-4 text-fluid-xl font-black tracking-tight text-white">
-            3 Adımda Başla
+            5 Adımda Yasal Çantaya
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-[#A0A0A0]">
-            Atölyeye gel, çantanı kaydet, projede yerini al. Her şey 10 dakikada.
+            WhatsApp&apos;tan fotoğraf gönder, projeyi al, TÜVTÜRK ve noteri aynı gün bitir.
           </p>
         </motion.div>
 
-        <div className="relative mt-16 grid gap-6 md:grid-cols-3 md:gap-8">
-          {steps.map((s, i) => {
-            const Icon = s.icon;
+        <div className="relative mt-16 grid gap-6 md:grid-cols-3 lg:grid-cols-5 md:gap-8">
+          {HOW_IT_WORKS.map((s, i) => {
+            const Icon = iconMap[s.iconName] ?? ClipboardCheck;
+            const num = String(i + 1).padStart(2, "0");
             return (
               <motion.div
-                key={s.num}
+                key={s.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.5, delay: i * 0.12 }}
-                className="group relative z-10 rounded-2xl border border-[#2A2A2A] bg-[#0A0A0A] p-8 transition-all duration-300 hover:-translate-y-1 hover:border-t-2 hover:border-t-[#FF6B00] hover:bg-[#1A1A1A]"
+                className="group relative z-10 rounded-2xl border border-[#2A2A2A] bg-[#0A0A0A] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-t-2 hover:border-t-[#FF6B00] hover:bg-[#1A1A1A]"
               >
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute right-4 top-2 text-[80px] font-black leading-none"
+                  className="pointer-events-none absolute right-3 top-1 text-[64px] font-black leading-none"
                   style={{ color: "rgba(255,107,0,0.10)" }}
                 >
-                  {s.num}
+                  {num}
                 </span>
 
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FF6B00]/10">
-                  <Icon size={22} className="text-[#FF6B00]" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FF6B00]/10">
+                  <Icon size={20} className="text-[#FF6B00]" />
                 </div>
 
-                <h3 className="relative mt-6 text-xl font-bold text-white">{s.title}</h3>
-                <p className="relative mt-3 text-[14px] leading-relaxed text-[#A0A0A0]">
-                  {s.desc}
+                <h3 className="relative mt-5 text-[17px] font-bold text-white">
+                  {s.title}
+                </h3>
+                <p className="relative mt-2 text-[13px] leading-relaxed text-[#A0A0A0]">
+                  {s.description}
                 </p>
 
-                <div className="relative mt-6 text-[12px] font-semibold uppercase tracking-wider text-[#FF6B00]">
-                  → Devamı
-                </div>
-
-                {i < steps.length - 1 && (
+                {i < HOW_IT_WORKS.length - 1 && (
                   <div
                     aria-hidden
-                    className="absolute -right-5 top-1/2 hidden -translate-y-1/2 md:block"
+                    className="absolute -right-5 top-1/2 hidden -translate-y-1/2 lg:block"
                   >
-                    <ArrowRight size={24} className="text-[#2A2A2A]" />
+                    <ArrowRight size={20} className="text-[#2A2A2A]" />
                   </div>
                 )}
               </motion.div>

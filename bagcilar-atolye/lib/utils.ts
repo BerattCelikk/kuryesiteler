@@ -2,6 +2,13 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { WORKSHOP } from "./constants";
 
+export const DEFAULT_WHATSAPP_MESSAGE =
+  "Merhaba, motosiklet çantamı ruhsata işletmek istiyorum. Ön kontrol yaptırabilir miyim?";
+
+export function whatsappLink(message: string = DEFAULT_WHATSAPP_MESSAGE): string {
+  return `https://wa.me/${WORKSHOP.whatsappRaw}?text=${encodeURIComponent(message)}`;
+}
+
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
@@ -25,11 +32,10 @@ export interface WorkshopStatus {
 export function isWorkshopOpen(date: Date = new Date()): WorkshopStatus {
   const hour = date.getHours() + date.getMinutes() / 60;
   const { openHour, closeHour } = WORKSHOP;
-  const effective = closeHour > 24 ? closeHour - 24 : closeHour;
   const isOpen =
     closeHour > 24
-      ? hour >= openHour || hour < effective
-      : hour >= openHour && hour < effective;
+      ? hour >= openHour || hour < closeHour - 24
+      : hour >= openHour && hour < closeHour;
   return { isOpen, label: isOpen ? "AÇIK" : "KAPALI" };
 }
 
